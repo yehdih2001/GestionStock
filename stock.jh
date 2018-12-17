@@ -1,0 +1,35 @@
+
+
+entity Client {
+	Nom String
+}
+
+entity Provider {
+	Nom String
+}
+
+entity Product {
+	Nom String
+}
+
+relationship ManyToMany {
+	Product{provider} to Provider{prodcut}
+}
+
+relationship ManyToMany {
+	Product{client} to Client{prodcut}
+}
+
+
+// Set pagination options
+paginate Product, Provider,Client with infinite-scroll
+paginate Product with pagination
+
+// Use Data Transfert Objects (DTO)
+// dto * with mapstruct
+
+// Set service options to all except few
+service all with serviceImpl except Product, Provider,Client
+
+// Set an angular suffix
+// angularSuffix * with mySuffix
