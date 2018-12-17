@@ -1,0 +1,28 @@
+{
+    "name": "Provider",
+    "fields": [
+        {
+            "fieldName": "nom",
+            "fieldType": "String"
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "many-to-many",
+            "relationshipName": "prodcut",
+            "otherEntityName": "product",
+            "ownerSide": false,
+            "otherEntityRelationshipName": "provider"
+        }
+    ],
+    "changelogDate": "20181217011431",
+    "entityTableName": "provider",
+    "dto": "no",
+    "pagination": "infinite-scroll",
+    "service": "no",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "gestionStock",
+    "applications": "*",
+    "microserviceName": "gestionStock"
+}
