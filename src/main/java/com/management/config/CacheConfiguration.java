@@ -43,6 +43,15 @@ public class CacheConfiguration {
             cm.createCache(com.management.domain.Product.class.getName(), jcacheConfiguration);
             cm.createCache(com.management.domain.Product.class.getName() + ".providers", jcacheConfiguration);
             cm.createCache(com.management.domain.Product.class.getName() + ".clients", jcacheConfiguration);
+            cm.createCache(com.management.domain.Compagny.class.getName(), jcacheConfiguration);
+            cm.createCache(com.management.domain.AppUser.class.getName(), jcacheConfiguration);
+            cm.createCache(com.management.domain.Preference.class.getName(), jcacheConfiguration);
+            cm.createCache(com.management.domain.Erp.class.getName(), jcacheConfiguration);
+            cm.createCache(com.management.domain.Erp.class.getName() + ".compagnies", jcacheConfiguration);
+            cm.createCache(com.management.domain.Erp.class.getName() + ".users", jcacheConfiguration);
+            cm.createCache(com.management.domain.ProductInventoryView.class.getName(), jcacheConfiguration);
+            cm.createCache(com.management.domain.ProductReodringRules.class.getName(), jcacheConfiguration);
+            cm.createCache(com.management.domain.ProductCount.class.getName(), jcacheConfiguration);
             // jhipster-needle-ehcache-add-entry
         };
     }

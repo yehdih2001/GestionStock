@@ -2,32 +2,58 @@
     "name": "Product",
     "fields": [
         {
-            "fieldName": "nom",
+            "fieldName": "name",
             "fieldType": "String"
-        }
-    ],
-    "relationships": [
-        {
-            "relationshipType": "many-to-many",
-            "otherEntityRelationshipName": "prodcut",
-            "relationshipName": "provider",
-            "otherEntityName": "provider",
-            "otherEntityField": "id",
-            "ownerSide": true
         },
         {
-            "relationshipType": "many-to-many",
-            "otherEntityRelationshipName": "prodcut",
-            "relationshipName": "client",
-            "otherEntityName": "client",
-            "otherEntityField": "id",
-            "ownerSide": true
+            "fieldName": "canBeSold",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "canBePurchased",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "productType",
+            "fieldType": "ProductType",
+            "fieldValues": "Consumable,StorableProduct,Service"
+        },
+        {
+            "fieldName": "productCategory",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "internalReference",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "salesPrice",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "cost",
+            "fieldType": "Double"
+        },
+        {
+            "fieldName": "barCode",
+            "fieldType": "byte[]",
+            "fieldTypeBlobContent": "any"
+        },
+        {
+            "fieldName": "internalNotes",
+            "fieldType": "byte[]",
+            "fieldTypeBlobContent": "text"
+        },
+        {
+            "fieldName": "active",
+            "fieldType": "Boolean"
         }
     ],
+    "relationships": [],
     "changelogDate": "20181217011432",
     "entityTableName": "product",
     "dto": "no",
-    "pagination": "pagination",
+    "pagination": "no",
     "service": "no",
     "jpaMetamodelFiltering": false,
     "fluentMethods": true,

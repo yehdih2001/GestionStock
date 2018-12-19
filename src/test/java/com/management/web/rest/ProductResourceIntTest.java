@@ -10,12 +10,9 @@ import com.management.web.rest.errors.ExceptionTranslator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -23,10 +20,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
 import org.springframework.validation.Validator;
 
 import javax.persistence.EntityManager;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,6 +36,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.management.domain.enumeration.ProductType;
 /**
  * Test class for the ProductResource REST controller.
  *
@@ -48,14 +46,43 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = GestionStockApp.class)
 public class ProductResourceIntTest {
 
-    private static final String DEFAULT_NOM = "AAAAAAAAAA";
-    private static final String UPDATED_NOM = "BBBBBBBBBB";
+    private static final String DEFAULT_NAME = "AAAAAAAAAA";
+    private static final String UPDATED_NAME = "BBBBBBBBBB";
+
+    private static final Boolean DEFAULT_CAN_BE_SOLD = false;
+    private static final Boolean UPDATED_CAN_BE_SOLD = true;
+
+    private static final Boolean DEFAULT_CAN_BE_PURCHASED = false;
+    private static final Boolean UPDATED_CAN_BE_PURCHASED = true;
+
+    private static final ProductType DEFAULT_PRODUCT_TYPE = ProductType.Consumable;
+    private static final ProductType UPDATED_PRODUCT_TYPE = ProductType.StorableProduct;
+
+    private static final String DEFAULT_PRODUCT_CATEGORY = "AAAAAAAAAA";
+    private static final String UPDATED_PRODUCT_CATEGORY = "BBBBBBBBBB";
+
+    private static final String DEFAULT_INTERNAL_REFERENCE = "AAAAAAAAAA";
+    private static final String UPDATED_INTERNAL_REFERENCE = "BBBBBBBBBB";
+
+    private static final Double DEFAULT_SALES_PRICE = 1D;
+    private static final Double UPDATED_SALES_PRICE = 2D;
+
+    private static final Double DEFAULT_COST = 1D;
+    private static final Double UPDATED_COST = 2D;
+
+    private static final byte[] DEFAULT_BAR_CODE = TestUtil.createByteArray(1, "0");
+    private static final byte[] UPDATED_BAR_CODE = TestUtil.createByteArray(1, "1");
+    private static final String DEFAULT_BAR_CODE_CONTENT_TYPE = "image/jpg";
+    private static final String UPDATED_BAR_CODE_CONTENT_TYPE = "image/png";
+
+    private static final String DEFAULT_INTERNAL_NOTES = "AAAAAAAAAA";
+    private static final String UPDATED_INTERNAL_NOTES = "BBBBBBBBBB";
+
+    private static final Boolean DEFAULT_ACTIVE = false;
+    private static final Boolean UPDATED_ACTIVE = true;
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Mock
-    private ProductRepository productRepositoryMock;
 
     /**
      * This repository is mocked in the com.management.repository.search test package.
@@ -104,7 +131,18 @@ public class ProductResourceIntTest {
      */
     public static Product createEntity(EntityManager em) {
         Product product = new Product()
-            .nom(DEFAULT_NOM);
+            .name(DEFAULT_NAME)
+            .canBeSold(DEFAULT_CAN_BE_SOLD)
+            .canBePurchased(DEFAULT_CAN_BE_PURCHASED)
+            .productType(DEFAULT_PRODUCT_TYPE)
+            .productCategory(DEFAULT_PRODUCT_CATEGORY)
+            .internalReference(DEFAULT_INTERNAL_REFERENCE)
+            .salesPrice(DEFAULT_SALES_PRICE)
+            .cost(DEFAULT_COST)
+            .barCode(DEFAULT_BAR_CODE)
+            .barCodeContentType(DEFAULT_BAR_CODE_CONTENT_TYPE)
+            .internalNotes(DEFAULT_INTERNAL_NOTES)
+            .active(DEFAULT_ACTIVE);
         return product;
     }
 
@@ -128,7 +166,18 @@ public class ProductResourceIntTest {
         List<Product> productList = productRepository.findAll();
         assertThat(productList).hasSize(databaseSizeBeforeCreate + 1);
         Product testProduct = productList.get(productList.size() - 1);
-        assertThat(testProduct.getNom()).isEqualTo(DEFAULT_NOM);
+        assertThat(testProduct.getName()).isEqualTo(DEFAULT_NAME);
+        assertThat(testProduct.isCanBeSold()).isEqualTo(DEFAULT_CAN_BE_SOLD);
+        assertThat(testProduct.isCanBePurchased()).isEqualTo(DEFAULT_CAN_BE_PURCHASED);
+        assertThat(testProduct.getProductType()).isEqualTo(DEFAULT_PRODUCT_TYPE);
+        assertThat(testProduct.getProductCategory()).isEqualTo(DEFAULT_PRODUCT_CATEGORY);
+        assertThat(testProduct.getInternalReference()).isEqualTo(DEFAULT_INTERNAL_REFERENCE);
+        assertThat(testProduct.getSalesPrice()).isEqualTo(DEFAULT_SALES_PRICE);
+        assertThat(testProduct.getCost()).isEqualTo(DEFAULT_COST);
+        assertThat(testProduct.getBarCode()).isEqualTo(DEFAULT_BAR_CODE);
+        assertThat(testProduct.getBarCodeContentType()).isEqualTo(DEFAULT_BAR_CODE_CONTENT_TYPE);
+        assertThat(testProduct.getInternalNotes()).isEqualTo(DEFAULT_INTERNAL_NOTES);
+        assertThat(testProduct.isActive()).isEqualTo(DEFAULT_ACTIVE);
 
         // Validate the Product in Elasticsearch
         verify(mockProductSearchRepository, times(1)).save(testProduct);
@@ -167,42 +216,20 @@ public class ProductResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(product.getId().intValue())))
-            .andExpect(jsonPath("$.[*].nom").value(hasItem(DEFAULT_NOM.toString())));
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].canBeSold").value(hasItem(DEFAULT_CAN_BE_SOLD.booleanValue())))
+            .andExpect(jsonPath("$.[*].canBePurchased").value(hasItem(DEFAULT_CAN_BE_PURCHASED.booleanValue())))
+            .andExpect(jsonPath("$.[*].productType").value(hasItem(DEFAULT_PRODUCT_TYPE.toString())))
+            .andExpect(jsonPath("$.[*].productCategory").value(hasItem(DEFAULT_PRODUCT_CATEGORY.toString())))
+            .andExpect(jsonPath("$.[*].internalReference").value(hasItem(DEFAULT_INTERNAL_REFERENCE.toString())))
+            .andExpect(jsonPath("$.[*].salesPrice").value(hasItem(DEFAULT_SALES_PRICE.doubleValue())))
+            .andExpect(jsonPath("$.[*].cost").value(hasItem(DEFAULT_COST.doubleValue())))
+            .andExpect(jsonPath("$.[*].barCodeContentType").value(hasItem(DEFAULT_BAR_CODE_CONTENT_TYPE)))
+            .andExpect(jsonPath("$.[*].barCode").value(hasItem(Base64Utils.encodeToString(DEFAULT_BAR_CODE))))
+            .andExpect(jsonPath("$.[*].internalNotes").value(hasItem(DEFAULT_INTERNAL_NOTES.toString())))
+            .andExpect(jsonPath("$.[*].active").value(hasItem(DEFAULT_ACTIVE.booleanValue())));
     }
     
-    @SuppressWarnings({"unchecked"})
-    public void getAllProductsWithEagerRelationshipsIsEnabled() throws Exception {
-        ProductResource productResource = new ProductResource(productRepositoryMock, mockProductSearchRepository);
-        when(productRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
-
-        MockMvc restProductMockMvc = MockMvcBuilders.standaloneSetup(productResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter).build();
-
-        restProductMockMvc.perform(get("/api/products?eagerload=true"))
-        .andExpect(status().isOk());
-
-        verify(productRepositoryMock, times(1)).findAllWithEagerRelationships(any());
-    }
-
-    @SuppressWarnings({"unchecked"})
-    public void getAllProductsWithEagerRelationshipsIsNotEnabled() throws Exception {
-        ProductResource productResource = new ProductResource(productRepositoryMock, mockProductSearchRepository);
-            when(productRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
-            MockMvc restProductMockMvc = MockMvcBuilders.standaloneSetup(productResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter).build();
-
-        restProductMockMvc.perform(get("/api/products?eagerload=true"))
-        .andExpect(status().isOk());
-
-            verify(productRepositoryMock, times(1)).findAllWithEagerRelationships(any());
-    }
-
     @Test
     @Transactional
     public void getProduct() throws Exception {
@@ -214,7 +241,18 @@ public class ProductResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(product.getId().intValue()))
-            .andExpect(jsonPath("$.nom").value(DEFAULT_NOM.toString()));
+            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
+            .andExpect(jsonPath("$.canBeSold").value(DEFAULT_CAN_BE_SOLD.booleanValue()))
+            .andExpect(jsonPath("$.canBePurchased").value(DEFAULT_CAN_BE_PURCHASED.booleanValue()))
+            .andExpect(jsonPath("$.productType").value(DEFAULT_PRODUCT_TYPE.toString()))
+            .andExpect(jsonPath("$.productCategory").value(DEFAULT_PRODUCT_CATEGORY.toString()))
+            .andExpect(jsonPath("$.internalReference").value(DEFAULT_INTERNAL_REFERENCE.toString()))
+            .andExpect(jsonPath("$.salesPrice").value(DEFAULT_SALES_PRICE.doubleValue()))
+            .andExpect(jsonPath("$.cost").value(DEFAULT_COST.doubleValue()))
+            .andExpect(jsonPath("$.barCodeContentType").value(DEFAULT_BAR_CODE_CONTENT_TYPE))
+            .andExpect(jsonPath("$.barCode").value(Base64Utils.encodeToString(DEFAULT_BAR_CODE)))
+            .andExpect(jsonPath("$.internalNotes").value(DEFAULT_INTERNAL_NOTES.toString()))
+            .andExpect(jsonPath("$.active").value(DEFAULT_ACTIVE.booleanValue()));
     }
 
     @Test
@@ -238,7 +276,18 @@ public class ProductResourceIntTest {
         // Disconnect from session so that the updates on updatedProduct are not directly saved in db
         em.detach(updatedProduct);
         updatedProduct
-            .nom(UPDATED_NOM);
+            .name(UPDATED_NAME)
+            .canBeSold(UPDATED_CAN_BE_SOLD)
+            .canBePurchased(UPDATED_CAN_BE_PURCHASED)
+            .productType(UPDATED_PRODUCT_TYPE)
+            .productCategory(UPDATED_PRODUCT_CATEGORY)
+            .internalReference(UPDATED_INTERNAL_REFERENCE)
+            .salesPrice(UPDATED_SALES_PRICE)
+            .cost(UPDATED_COST)
+            .barCode(UPDATED_BAR_CODE)
+            .barCodeContentType(UPDATED_BAR_CODE_CONTENT_TYPE)
+            .internalNotes(UPDATED_INTERNAL_NOTES)
+            .active(UPDATED_ACTIVE);
 
         restProductMockMvc.perform(put("/api/products")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -249,7 +298,18 @@ public class ProductResourceIntTest {
         List<Product> productList = productRepository.findAll();
         assertThat(productList).hasSize(databaseSizeBeforeUpdate);
         Product testProduct = productList.get(productList.size() - 1);
-        assertThat(testProduct.getNom()).isEqualTo(UPDATED_NOM);
+        assertThat(testProduct.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testProduct.isCanBeSold()).isEqualTo(UPDATED_CAN_BE_SOLD);
+        assertThat(testProduct.isCanBePurchased()).isEqualTo(UPDATED_CAN_BE_PURCHASED);
+        assertThat(testProduct.getProductType()).isEqualTo(UPDATED_PRODUCT_TYPE);
+        assertThat(testProduct.getProductCategory()).isEqualTo(UPDATED_PRODUCT_CATEGORY);
+        assertThat(testProduct.getInternalReference()).isEqualTo(UPDATED_INTERNAL_REFERENCE);
+        assertThat(testProduct.getSalesPrice()).isEqualTo(UPDATED_SALES_PRICE);
+        assertThat(testProduct.getCost()).isEqualTo(UPDATED_COST);
+        assertThat(testProduct.getBarCode()).isEqualTo(UPDATED_BAR_CODE);
+        assertThat(testProduct.getBarCodeContentType()).isEqualTo(UPDATED_BAR_CODE_CONTENT_TYPE);
+        assertThat(testProduct.getInternalNotes()).isEqualTo(UPDATED_INTERNAL_NOTES);
+        assertThat(testProduct.isActive()).isEqualTo(UPDATED_ACTIVE);
 
         // Validate the Product in Elasticsearch
         verify(mockProductSearchRepository, times(1)).save(testProduct);
@@ -302,14 +362,25 @@ public class ProductResourceIntTest {
     public void searchProduct() throws Exception {
         // Initialize the database
         productRepository.saveAndFlush(product);
-        when(mockProductSearchRepository.search(queryStringQuery("id:" + product.getId()), PageRequest.of(0, 20)))
-            .thenReturn(new PageImpl<>(Collections.singletonList(product), PageRequest.of(0, 1), 1));
+        when(mockProductSearchRepository.search(queryStringQuery("id:" + product.getId())))
+            .thenReturn(Collections.singletonList(product));
         // Search the product
         restProductMockMvc.perform(get("/api/_search/products?query=id:" + product.getId()))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(product.getId().intValue())))
-            .andExpect(jsonPath("$.[*].nom").value(hasItem(DEFAULT_NOM)));
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME)))
+            .andExpect(jsonPath("$.[*].canBeSold").value(hasItem(DEFAULT_CAN_BE_SOLD.booleanValue())))
+            .andExpect(jsonPath("$.[*].canBePurchased").value(hasItem(DEFAULT_CAN_BE_PURCHASED.booleanValue())))
+            .andExpect(jsonPath("$.[*].productType").value(hasItem(DEFAULT_PRODUCT_TYPE.toString())))
+            .andExpect(jsonPath("$.[*].productCategory").value(hasItem(DEFAULT_PRODUCT_CATEGORY)))
+            .andExpect(jsonPath("$.[*].internalReference").value(hasItem(DEFAULT_INTERNAL_REFERENCE)))
+            .andExpect(jsonPath("$.[*].salesPrice").value(hasItem(DEFAULT_SALES_PRICE.doubleValue())))
+            .andExpect(jsonPath("$.[*].cost").value(hasItem(DEFAULT_COST.doubleValue())))
+            .andExpect(jsonPath("$.[*].barCodeContentType").value(hasItem(DEFAULT_BAR_CODE_CONTENT_TYPE)))
+            .andExpect(jsonPath("$.[*].barCode").value(hasItem(Base64Utils.encodeToString(DEFAULT_BAR_CODE))))
+            .andExpect(jsonPath("$.[*].internalNotes").value(hasItem(DEFAULT_INTERNAL_NOTES.toString())))
+            .andExpect(jsonPath("$.[*].active").value(hasItem(DEFAULT_ACTIVE.booleanValue())));
     }
 
     @Test

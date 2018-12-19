@@ -7,9 +7,9 @@ import javax.persistence.*;
 
 import org.springframework.data.elasticsearch.annotations.Document;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Objects;
+
+import com.management.domain.enumeration.ProductType;
 
 /**
  * A Product.
@@ -27,22 +27,44 @@ public class Product implements Serializable {
     @SequenceGenerator(name = "sequenceGenerator")
     private Long id;
 
-    @Column(name = "nom")
-    private String nom;
+    @Column(name = "name")
+    private String name;
 
-    @ManyToMany
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    @JoinTable(name = "product_provider",
-               joinColumns = @JoinColumn(name = "products_id", referencedColumnName = "id"),
-               inverseJoinColumns = @JoinColumn(name = "providers_id", referencedColumnName = "id"))
-    private Set<Provider> providers = new HashSet<>();
+    @Column(name = "can_be_sold")
+    private Boolean canBeSold;
 
-    @ManyToMany
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    @JoinTable(name = "product_client",
-               joinColumns = @JoinColumn(name = "products_id", referencedColumnName = "id"),
-               inverseJoinColumns = @JoinColumn(name = "clients_id", referencedColumnName = "id"))
-    private Set<Client> clients = new HashSet<>();
+    @Column(name = "can_be_purchased")
+    private Boolean canBePurchased;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "product_type")
+    private ProductType productType;
+
+    @Column(name = "product_category")
+    private String productCategory;
+
+    @Column(name = "internal_reference")
+    private String internalReference;
+
+    @Column(name = "sales_price")
+    private Double salesPrice;
+
+    @Column(name = "jhi_cost")
+    private Double cost;
+
+    @Lob
+    @Column(name = "bar_code")
+    private byte[] barCode;
+
+    @Column(name = "bar_code_content_type")
+    private String barCodeContentType;
+
+    @Lob
+    @Column(name = "internal_notes")
+    private String internalNotes;
+
+    @Column(name = "active")
+    private Boolean active;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -53,67 +75,160 @@ public class Product implements Serializable {
         this.id = id;
     }
 
-    public String getNom() {
-        return nom;
+    public String getName() {
+        return name;
     }
 
-    public Product nom(String nom) {
-        this.nom = nom;
+    public Product name(String name) {
+        this.name = name;
         return this;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Set<Provider> getProviders() {
-        return providers;
+    public Boolean isCanBeSold() {
+        return canBeSold;
     }
 
-    public Product providers(Set<Provider> providers) {
-        this.providers = providers;
+    public Product canBeSold(Boolean canBeSold) {
+        this.canBeSold = canBeSold;
         return this;
     }
 
-    public Product addProvider(Provider provider) {
-        this.providers.add(provider);
-        provider.getProdcuts().add(this);
+    public void setCanBeSold(Boolean canBeSold) {
+        this.canBeSold = canBeSold;
+    }
+
+    public Boolean isCanBePurchased() {
+        return canBePurchased;
+    }
+
+    public Product canBePurchased(Boolean canBePurchased) {
+        this.canBePurchased = canBePurchased;
         return this;
     }
 
-    public Product removeProvider(Provider provider) {
-        this.providers.remove(provider);
-        provider.getProdcuts().remove(this);
+    public void setCanBePurchased(Boolean canBePurchased) {
+        this.canBePurchased = canBePurchased;
+    }
+
+    public ProductType getProductType() {
+        return productType;
+    }
+
+    public Product productType(ProductType productType) {
+        this.productType = productType;
         return this;
     }
 
-    public void setProviders(Set<Provider> providers) {
-        this.providers = providers;
+    public void setProductType(ProductType productType) {
+        this.productType = productType;
     }
 
-    public Set<Client> getClients() {
-        return clients;
+    public String getProductCategory() {
+        return productCategory;
     }
 
-    public Product clients(Set<Client> clients) {
-        this.clients = clients;
+    public Product productCategory(String productCategory) {
+        this.productCategory = productCategory;
         return this;
     }
 
-    public Product addClient(Client client) {
-        this.clients.add(client);
-        client.getProdcuts().add(this);
+    public void setProductCategory(String productCategory) {
+        this.productCategory = productCategory;
+    }
+
+    public String getInternalReference() {
+        return internalReference;
+    }
+
+    public Product internalReference(String internalReference) {
+        this.internalReference = internalReference;
         return this;
     }
 
-    public Product removeClient(Client client) {
-        this.clients.remove(client);
-        client.getProdcuts().remove(this);
+    public void setInternalReference(String internalReference) {
+        this.internalReference = internalReference;
+    }
+
+    public Double getSalesPrice() {
+        return salesPrice;
+    }
+
+    public Product salesPrice(Double salesPrice) {
+        this.salesPrice = salesPrice;
         return this;
     }
 
-    public void setClients(Set<Client> clients) {
-        this.clients = clients;
+    public void setSalesPrice(Double salesPrice) {
+        this.salesPrice = salesPrice;
+    }
+
+    public Double getCost() {
+        return cost;
+    }
+
+    public Product cost(Double cost) {
+        this.cost = cost;
+        return this;
+    }
+
+    public void setCost(Double cost) {
+        this.cost = cost;
+    }
+
+    public byte[] getBarCode() {
+        return barCode;
+    }
+
+    public Product barCode(byte[] barCode) {
+        this.barCode = barCode;
+        return this;
+    }
+
+    public void setBarCode(byte[] barCode) {
+        this.barCode = barCode;
+    }
+
+    public String getBarCodeContentType() {
+        return barCodeContentType;
+    }
+
+    public Product barCodeContentType(String barCodeContentType) {
+        this.barCodeContentType = barCodeContentType;
+        return this;
+    }
+
+    public void setBarCodeContentType(String barCodeContentType) {
+        this.barCodeContentType = barCodeContentType;
+    }
+
+    public String getInternalNotes() {
+        return internalNotes;
+    }
+
+    public Product internalNotes(String internalNotes) {
+        this.internalNotes = internalNotes;
+        return this;
+    }
+
+    public void setInternalNotes(String internalNotes) {
+        this.internalNotes = internalNotes;
+    }
+
+    public Boolean isActive() {
+        return active;
+    }
+
+    public Product active(Boolean active) {
+        this.active = active;
+        return this;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -141,7 +256,18 @@ public class Product implements Serializable {
     public String toString() {
         return "Product{" +
             "id=" + getId() +
-            ", nom='" + getNom() + "'" +
+            ", name='" + getName() + "'" +
+            ", canBeSold='" + isCanBeSold() + "'" +
+            ", canBePurchased='" + isCanBePurchased() + "'" +
+            ", productType='" + getProductType() + "'" +
+            ", productCategory='" + getProductCategory() + "'" +
+            ", internalReference='" + getInternalReference() + "'" +
+            ", salesPrice=" + getSalesPrice() +
+            ", cost=" + getCost() +
+            ", barCode='" + getBarCode() + "'" +
+            ", barCodeContentType='" + getBarCodeContentType() + "'" +
+            ", internalNotes='" + getInternalNotes() + "'" +
+            ", active='" + isActive() + "'" +
             "}";
     }
 }

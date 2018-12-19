@@ -1,15 +1,15 @@
 package com.management.repository;
 
-import com.management.domain.Product;
+import com.management.domain.AppUser;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
 
 /**
- * Spring Data  repository for the Product entity.
+ * Spring Data  repository for the AppUser entity.
  */
 @SuppressWarnings("unused")
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
 }
