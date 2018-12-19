@@ -6,14 +6,9 @@ import com.management.repository.ProductRepository;
 import com.management.repository.search.ProductSearchRepository;
 import com.management.web.rest.errors.BadRequestAlertException;
 import com.management.web.rest.util.HeaderUtil;
-import com.management.web.rest.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,22 +89,13 @@ public class ProductResource {
     /**
      * GET  /products : get all the products.
      *
-     * @param pageable the pagination information
-     * @param eagerload flag to eager load entities from relationships (This is applicable for many-to-many)
      * @return the ResponseEntity with status 200 (OK) and the list of products in body
      */
     @GetMapping("/products")
     @Timed
-    public ResponseEntity<List<Product>> getAllProducts(Pageable pageable, @RequestParam(required = false, defaultValue = "false") boolean eagerload) {
-        log.debug("REST request to get a page of Products");
-        Page<Product> page;
-        if (eagerload) {
-            page = productRepository.findAllWithEagerRelationships(pageable);
-        } else {
-            page = productRepository.findAll(pageable);
-        }
-        HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(page, String.format("/api/products?eagerload=%b", eagerload));
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+    public List<Product> getAllProducts() {
+        log.debug("REST request to get all Products");
+        return productRepository.findAll();
     }
 
     /**
@@ -122,7 +108,7 @@ public class ProductResource {
     @Timed
     public ResponseEntity<Product> getProduct(@PathVariable Long id) {
         log.debug("REST request to get Product : {}", id);
-        Optional<Product> product = productRepository.findOneWithEagerRelationships(id);
+        Optional<Product> product = productRepository.findById(id);
         return ResponseUtil.wrapOrNotFound(product);
     }
 
@@ -147,16 +133,15 @@ public class ProductResource {
      * to the query.
      *
      * @param query the query of the product search
-     * @param pageable the pagination information
      * @return the result of the search
      */
     @GetMapping("/_search/products")
     @Timed
-    public ResponseEntity<List<Product>> searchProducts(@RequestParam String query, Pageable pageable) {
-        log.debug("REST request to search for a page of Products for query {}", query);
-        Page<Product> page = productSearchRepository.search(queryStringQuery(query), pageable);
-        HttpHeaders headers = PaginationUtil.generateSearchPaginationHttpHeaders(query, page, "/api/_search/products");
-        return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
+    public List<Product> searchProducts(@RequestParam String query) {
+        log.debug("REST request to search Products for query {}", query);
+        return StreamSupport
+            .stream(productSearchRepository.search(queryStringQuery(query)).spliterator(), false)
+            .collect(Collectors.toList());
     }
 
 }

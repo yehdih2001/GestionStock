@@ -1,15 +1,15 @@
 package com.management.repository;
 
-import com.management.domain.Product;
+import com.management.domain.Erp;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
 
 /**
- * Spring Data  repository for the Product entity.
+ * Spring Data  repository for the Erp entity.
  */
 @SuppressWarnings("unused")
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ErpRepository extends JpaRepository<Erp, Long> {
 
 }
